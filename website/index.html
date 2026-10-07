@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111815">
+  <title>Daily Ritual — Supplement Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Daily Ritual home">
+        <span class="brand-mark">✦</span>
+        <span><strong>Daily Ritual</strong><small>Calendar</small></span>
+      </a>
+      <div class="topbar-actions">
+        <span class="storage-note" id="storageStatus">Restart-safe local storage</span>
+        <button class="icon-button" id="todayButton" type="button" aria-label="Go to today">Today</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="hero-card">
+        <div>
+          <p class="eyebrow">YOUR DAILY ROUTINE</p>
+          <h1>Small steps, <em>every day.</em></h1>
+          <p class="hero-copy">Keep your supplements organized and your routine visible.</p>
+        </div>
+        <div class="hero-stats" aria-label="Calendar statistics">
+          <div class="stat"><strong id="completedCount">0</strong><span>days logged</span></div>
+          <div class="stat"><strong id="streakCount">0</strong><span>day streak</span></div>
+        </div>
+      </section>
+
+      <nav class="view-tabs" role="tablist" aria-label="Calendar views">
+        <button class="view-tab active" id="calendarTab" type="button" role="tab" aria-selected="true" aria-controls="calendarView">Calendar</button>
+        <button class="view-tab" id="eventsTab" type="button" role="tab" aria-selected="false" aria-controls="eventsView">Events</button>
+      </nav>
+
+      <section class="content-grid" id="calendarView" role="tabpanel" aria-labelledby="calendarTab">
+        <article class="panel calendar-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">MONTHLY VIEW</p>
+              <h2 id="monthTitle">Month</h2>
+            </div>
+            <div class="month-controls">
+              <button id="previousMonth" class="round-button" type="button" aria-label="Previous month">←</button>
+              <button id="nextMonth" class="round-button" type="button" aria-label="Next month">→</button>
+            </div>
+          </div>
+          <div class="weekday-row" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          <div class="calendar-grid" id="calendarGrid" aria-label="Supplement and event calendar"></div>
+          <p class="calendar-hint"><span class="legend-dot"></span> Select a day to review supplements or add events.</p>
+        </article>
+
+        <aside class="side-column">
+          <article class="panel selected-panel">
+            <div class="selected-date-row">
+              <div>
+                <p class="eyebrow">SELECTED DAY</p>
+                <h2 id="selectedDate">—</h2>
+              </div>
+              <span class="day-badge" id="dayBadge">0</span>
+            </div>
+            <div id="selectedItems" class="selected-items"></div>
+            <section class="events-section" aria-label="Events for selected day">
+              <div class="events-heading"><h3>Events</h3><span class="count-pill" id="eventCount">0</span></div>
+              <button id="addEventButton" class="event-add-button" type="button">Add event</button>
+              <div id="eventList" class="event-list"></div>
+            </section>
+            <button id="logButton" class="primary-button" type="button">Log supplements</button>
+          </article>
+
+          <article class="panel supplements-panel">
+            <div class="panel-heading compact">
+              <div><p class="eyebrow">YOUR SUPPLEMENTS</p><h2>Routine</h2></div>
+              <span class="count-pill" id="supplementCount">0</span>
+            </div>
+            <form id="supplementForm" class="supplement-form">
+              <input id="supplementName" type="text" maxlength="40" placeholder="Add a supplement" aria-label="Supplement name" required>
+              <button type="submit" aria-label="Add supplement">+</button>
+            </form>
+            <div id="supplementList" class="supplement-list"></div>
+          </article>
+        </aside>
+      </section>
+
+      <section class="events-view" id="eventsView" role="tabpanel" aria-labelledby="eventsTab" hidden>
+        <header class="events-view-heading">
+          <div><p class="eyebrow">EVENT LIBRARY</p><h2>All events</h2></div>
+          <div class="events-toolbar">
+            <label class="events-search-wrap">
+              <span class="visually-hidden">Search event subjects</span>
+              <input id="eventsSearch" type="search" placeholder="Search subjects" autocomplete="off">
+            </label>
+            <span class="count-pill" id="allEventsCount">0</span>
+          </div>
+        </header>
+        <div class="events-browser-list" id="allEventsList"></div>
+        <p class="empty-state events-empty" id="allEventsEmpty" hidden>No events yet.</p>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="logDialog" class="log-dialog">
+    <form method="dialog" id="logForm">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">DAILY CHECK-IN</p><h2 id="dialogTitle">Log supplements</h2></div>
+        <button class="close-button" value="cancel" aria-label="Close">×</button>
+      </div>
+      <div id="checklist" class="checklist"></div>
+      <div class="dialog-actions">
+        <button class="secondary-button" value="cancel" type="button" id="cancelButton">Cancel</button>
+        <button class="primary-button" type="submit">Save day</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="eventDialog" class="log-dialog event-dialog" aria-labelledby="eventDialogTitle">
+    <form id="eventForm">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">CALENDAR EVENT</p><h2 id="eventDialogTitle">Add event</h2></div>
+        <button class="close-button" type="button" id="closeEventButton" aria-label="Close">×</button>
+      </div>
+      <label class="event-field" for="eventSubject">Subject
+        <input id="eventSubject" type="text" maxlength="80" placeholder="Event subject" required>
+      </label>
+      <label class="event-field" for="eventDescription">Description
+        <textarea id="eventDescription" maxlength="500" rows="4" placeholder="Add details (optional)"></textarea>
+      </label>
+      <fieldset class="importance-fieldset">
+        <legend>Importance</legend>
+        <div class="importance-options">
+          <label class="importance-option importance-1"><input type="radio" name="eventImportance" value="1" required><span>1 <small>Neutral</small></span></label>
+          <label class="importance-option importance-2"><input type="radio" name="eventImportance" value="2"><span>2 <small>Low</small></span></label>
+          <label class="importance-option importance-3"><input type="radio" name="eventImportance" value="3"><span>3 <small>Mild</small></span></label>
+          <label class="importance-option importance-4"><input type="radio" name="eventImportance" value="4"><span>4 <small>Very Important</small></span></label>
+        </div>
+      </fieldset>
+      <div class="dialog-actions">
+        <button class="secondary-button" type="button" id="cancelEventButton">Cancel</button>
+        <button class="primary-button" type="submit">Save event</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="quickMenuDialog" class="log-dialog quick-menu-dialog" aria-labelledby="quickMenuTitle">
+    <form method="dialog">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">SELECTED DAY</p><h2 id="quickMenuTitle">Add to this day</h2></div>
+        <button class="close-button" value="cancel" aria-label="Close">×</button>
+      </div>
+      <div class="quick-menu-options">
+        <button class="quick-menu-option" type="button" id="quickLogButton">
+          <strong>Log supplements</strong><span>Record your routine for this day</span>
+        </button>
+        <button class="quick-menu-option" type="button" id="quickEventButton">
+          <strong>Add an event</strong><span>Schedule something on this day</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="src/calendar.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
