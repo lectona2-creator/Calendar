@@ -77,6 +77,7 @@ class DailyRitualApp {
       authConfigNote: document.querySelector("#authConfigNote"), authError: document.querySelector("#authError"),
       closeAuthButton: document.querySelector("#closeAuthButton")
     };
+    this.authError = this.elements.authError;
 
     document.querySelector("#previousMonth").addEventListener("click", () => this.changeMonth(-1));
     this.elements.calendarTab.addEventListener("click", () => this.setView("calendar"));
