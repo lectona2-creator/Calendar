@@ -55,11 +55,4 @@
 
   const CalendarCore = { buildCalendarDays, getMonthLabel, getSelectedItems, getStats, toDateKey, SUPPLEMENT_COLORS };
   globalThis.CalendarCore = CalendarCore;
-
-  if (typeof document !== "undefined") {
-    document.addEventListener("DOMContentLoaded", () => {
-      const app = new DailyRitualApp();
-      app.init();
-    });
-  }
 })();

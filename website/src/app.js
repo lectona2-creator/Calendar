@@ -8,6 +8,10 @@ class DailyRitualApp {
     this.records = this.state.records || {};
     this.events = this.state.events || {};
     this.supplements = this.state.supplements || ["Vitamin D", "Omega-3", "Magnesium"];
+    this.sync = new globalThis.DailyRitualSupabase();
+    this.authMode = "sign-in";
+    this.authUser = null;
+    this.syncPending = false;
     this.elements = {};
   }
 
@@ -39,17 +43,12 @@ class DailyRitualApp {
   }
 
   persist() {
-    const snapshot = JSON.stringify({
-      version: 3,
-      lastSavedAt: new Date().toISOString(),
-      records: this.records,
-      events: this.events,
-      supplements: this.supplements
-    });
-    localStorage.setItem(this.storageKey, snapshot);
+    const snapshot = this.snapshot();
+    localStorage.setItem(this.storageKey, JSON.stringify(snapshot));
     if (navigator.storage && typeof navigator.storage.persist === "function") {
       navigator.storage.persist().catch(() => {});
     }
+    this.syncToCloud();
   }
 
   init() {
@@ -70,7 +69,13 @@ class DailyRitualApp {
       supplementName: document.querySelector("#supplementName"), logDialog: document.querySelector("#logDialog"),
       quickMenuDialog: document.querySelector("#quickMenuDialog"),
       checklist: document.querySelector("#checklist"), dialogTitle: document.querySelector("#dialogTitle"),
-      toast: document.querySelector("#toast"), storageStatus: document.querySelector("#storageStatus")
+      toast: document.querySelector("#toast"), storageStatus: document.querySelector("#storageStatus"),
+      accountButton: document.querySelector("#accountButton"), authDialog: document.querySelector("#authDialog"),
+      authForm: document.querySelector("#authForm"), authEmail: document.querySelector("#authEmail"),
+      authPassword: document.querySelector("#authPassword"), authSwitchButton: document.querySelector("#authSwitchButton"),
+      authSubmitButton: document.querySelector("#authSubmitButton"), authDialogTitle: document.querySelector("#authDialogTitle"),
+      authConfigNote: document.querySelector("#authConfigNote"), authError: document.querySelector("#authError"),
+      closeAuthButton: document.querySelector("#closeAuthButton")
     };
 
     document.querySelector("#previousMonth").addEventListener("click", () => this.changeMonth(-1));
@@ -110,6 +115,13 @@ class DailyRitualApp {
     this.elements.eventDialog.addEventListener("click", (event) => {
       if (event.target === this.elements.eventDialog) this.elements.eventDialog.close();
     });
+    this.elements.accountButton.addEventListener("click", () => this.openAuthDialog());
+    this.elements.authForm.addEventListener("submit", (event) => this.handleAuthSubmit(event));
+    this.elements.authSwitchButton.addEventListener("click", () => this.switchAuthMode());
+    this.elements.closeAuthButton.addEventListener("click", () => this.elements.authDialog.close());
+    this.elements.authDialog.addEventListener("click", (event) => {
+      if (event.target === this.elements.authDialog) this.elements.authDialog.close();
+    });
     this.elements.eventForm.addEventListener("submit", (event) => this.addEvent(event));
     this.elements.supplementForm.addEventListener("submit", (event) => this.addSupplement(event));
     document.querySelector("#logForm").addEventListener("submit", (event) => this.saveDay(event));
@@ -117,10 +129,6 @@ class DailyRitualApp {
       if (event.target === this.elements.logDialog) this.elements.logDialog.close();
     });
 
-    if (!this.supplements.length) {
-      this.supplements = ["Vitamin D", "Omega-3", "Magnesium"];
-      this.persist();
-    }
     if (navigator.storage && typeof navigator.storage.persist === "function") {
       navigator.storage.persist().then((granted) => {
         this.elements.storageStatus.textContent = granted
@@ -128,10 +136,140 @@ class DailyRitualApp {
           : "Restart-safe local storage";
       });
     }
+
     this.renderAll();
+
+    this.sync.initialize()
+      .then(() => this.syncCurrentUser())
+      .catch((error) => {
+        this.elements.storageStatus.textContent = "Local storage only";
+        this.showToast("Supabase sync unavailable: " + error.message);
+      });
   }
 
   dateKey(date) { return CalendarCore.toDateKey(date); }
+
+  openAuthDialog() {
+    this.authError.textContent = "";
+    if (this.sync.user) {
+      this.elements.authDialogTitle.textContent = "Account";
+      this.elements.authConfigNote.textContent = `Signed in as ${this.sync.user.email}`;
+      this.elements.authEmail.value = this.sync.user.email || "";
+      this.elements.authPassword.value = "";
+      this.elements.authPassword.hidden = true;
+      this.elements.authSwitchButton.hidden = true;
+      this.elements.authSubmitButton.textContent = "Sign out";
+      this.elements.authSubmitButton.dataset.action = "sign-out";
+    } else {
+      this.elements.authDialogTitle.textContent = this.authMode === "sign-in" ? "Sign in" : "Create account";
+      this.elements.authConfigNote.textContent = this.sync.enabled
+        ? "Your data will sync across devices after authentication."
+        : "Add your Supabase URL and anonymous key to supabase-config.js first.";
+      this.elements.authPassword.hidden = false;
+      this.elements.authSwitchButton.hidden = false;
+      this.elements.authSwitchButton.textContent = this.authMode === "sign-in" ? "Create account" : "Sign in";
+      this.elements.authSubmitButton.textContent = this.authMode === "sign-in" ? "Sign in" : "Create account";
+      this.elements.authSubmitButton.dataset.action = "authenticate";
+    }
+    this.elements.authDialog.showModal();
+  }
+
+  switchAuthMode() {
+    this.authMode = this.authMode === "sign-in" ? "sign-up" : "sign-in";
+    this.elements.authPassword.autocomplete = this.authMode === "sign-in" ? "current-password" : "new-password";
+    this.openAuthDialog();
+  }
+
+  async handleAuthSubmit(event) {
+    event.preventDefault();
+    this.authError.textContent = "";
+    const email = this.elements.authEmail.value.trim();
+    const password = this.elements.authPassword.value;
+
+    if (this.elements.authSubmitButton.dataset.action === "sign-out") {
+      try {
+        await this.sync.signOut();
+        this.authUser = null;
+        this.elements.accountButton.textContent = "Sign in";
+        this.elements.storageStatus.textContent = "Restart-safe local storage";
+        this.elements.authDialog.close();
+        this.showToast("Signed out.");
+      } catch (error) {
+        this.authError.textContent = error.message;
+      }
+      return;
+    }
+
+    try {
+      if (!this.sync.enabled) throw new Error("Supabase configuration is missing.");
+      if (this.authMode === "sign-in") await this.sync.signIn(email, password);
+      else await this.sync.signUp(email, password);
+      this.authUser = this.sync.user;
+      this.elements.accountButton.textContent = this.authUser.email.split("@")[0];
+      this.elements.storageStatus.textContent = "Synced with account";
+      this.elements.authDialog.close();
+      await this.syncCurrentUser();
+      this.showToast(this.authMode === "sign-in" ? "Signed in and synced." : "Account created. Your data is syncing.");
+    } catch (error) {
+      this.authError.textContent = error.message || "Authentication failed.";
+    }
+  }
+
+  async syncCurrentUser() {
+    if (!this.sync.enabled || !this.sync.user) return;
+    const snapshot = this.snapshot();
+    const result = await this.sync.sync(snapshot);
+    if (!result.changed) return;
+
+    if (result.data && result.data.records !== undefined) {
+      this.records = result.data.records;
+      this.events = result.data.events;
+      this.supplements = result.data.supplements;
+      this.state = {
+        records: this.records,
+        events: this.events,
+        supplements: this.supplements,
+        lastSavedAt: result.data.lastSavedAt || new Date().toISOString()
+      };
+      this.persistLocalOnly();
+      this.renderAll();
+    }
+  }
+
+  async syncToCloud() {
+    if (!this.sync.enabled || !this.sync.user || this.syncPending) return;
+    this.syncPending = true;
+    try {
+      const result = await this.sync.sync(this.snapshot());
+      if (result.changed && result.data && result.data.records !== undefined) {
+        this.records = result.data.records;
+        this.events = result.data.events;
+        this.supplements = result.data.supplements;
+        this.state = result.data;
+        this.persistLocalOnly();
+        this.renderAll();
+      }
+    } catch (error) {
+      this.elements.storageStatus.textContent = "Local storage only";
+      this.showToast("Could not sync: " + error.message);
+    } finally {
+      this.syncPending = false;
+    }
+  }
+
+  snapshot() {
+    return {
+      version: 3,
+      lastSavedAt: new Date().toISOString(),
+      records: this.records,
+      events: this.events,
+      supplements: this.supplements
+    };
+  }
+
+  persistLocalOnly() {
+    localStorage.setItem(this.storageKey, JSON.stringify(this.snapshot()));
+  }
 
   handleKeyboardShortcut(event) {
     if (this.activeView !== "calendar" || event.altKey || event.ctrlKey || event.metaKey || this.elements.logDialog.open || this.elements.quickMenuDialog.open || this.elements.eventDialog.open) return;
@@ -565,4 +703,13 @@ class DailyRitualApp {
   escapeHtml(value) {
     return value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
   }
+}
+
+globalThis.DailyRitualApp = DailyRitualApp;
+
+if (typeof document !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    const app = new DailyRitualApp();
+    app.init();
+  });
 }
