@@ -62,8 +62,8 @@ h2 { font-size: 17px; }
 .round-button:hover, .icon-button:hover { border-color: var(--green); color: var(--green); background: #26332b; transform: translateY(-1px); }
 .weekday-row, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .weekday-row { margin-top: 12px; padding: 0 5px 6px; color: #93a198; font-size: 8px; font-weight: 800; letter-spacing: .08em; text-align: center; text-transform: uppercase; }
-.calendar-grid { gap: clamp(4px, .45vw, 8px); }
-.calendar-day { position: relative; aspect-ratio: 1 / 1; min-height: 0; padding: clamp(7px, .7vw, 10px); border: 1px solid transparent; border-radius: 10px; color: var(--ink); background: #222d27; transition: .15s; text-align: left; }
+.calendar-grid { gap: clamp(3px, .35vw, 6px); }
+.calendar-day { position: relative; aspect-ratio: 1 / 1; min-height: 0; padding: clamp(5px, .5vw, 8px); border: 1px solid transparent; border-radius: 10px; color: var(--ink); background: #222d27; transition: .15s; text-align: left; }
 .calendar-day:hover { border-color: #52665a; background: #2a3930; }
 .calendar-day.outside-month { color: #718078; background: rgba(15, 21, 18, .28); }
 .calendar-day.today { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
