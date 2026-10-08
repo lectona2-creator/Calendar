@@ -54,14 +54,14 @@ h2 { font-size: 17px; }
 .content-grid { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(290px, .85fr); gap: clamp(10px, 1vw, 18px); align-items: start; }
 .content-grid > * { min-width: 0; }
 .panel { border: 1px solid var(--line); border-radius: 16px; background: rgba(27, 36, 32, .96); box-shadow: 0 8px 24px rgba(0, 0, 0, .16); }
-.calendar-panel { padding: 17px; }
+.calendar-panel { padding: 12px; }
 .panel-heading, .selected-date-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .panel-heading.compact { align-items: flex-start; }
 .month-controls { display: flex; gap: 8px; }
 .round-button { width: 40px; height: 40px; border-radius: 50%; font-size: 17px; transition: .2s; }
 .round-button:hover, .icon-button:hover { border-color: var(--green); color: var(--green); background: #26332b; transform: translateY(-1px); }
 .weekday-row, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.weekday-row { margin-top: 12px; padding: 0 5px 6px; color: #93a198; font-size: 8px; font-weight: 800; letter-spacing: .08em; text-align: center; text-transform: uppercase; }
+.weekday-row { margin-top: 8px; padding: 0 5px 5px; color: #93a198; font-size: 8px; font-weight: 800; letter-spacing: .08em; text-align: center; text-transform: uppercase; }
 .calendar-grid { width: 100%; max-width: 780px; gap: clamp(3px, .35vw, 6px); margin-inline: auto; }
 .calendar-day { position: relative; aspect-ratio: 1 / 1; min-height: 0; padding: clamp(5px, .5vw, 8px); border: 1px solid transparent; border-radius: 10px; color: var(--ink); background: #222d27; transition: .15s; text-align: left; }
 .calendar-day:hover { border-color: #52665a; background: #2a3930; }
@@ -213,6 +213,7 @@ h2 { font-size: 17px; }
   .events-toolbar, .events-search-wrap, .events-search-wrap input { width: 100%; }
   .event-browser-row { align-items: flex-start; flex-direction: column; gap: 8px; }
   .event-browser-actions { width: 100%; justify-content: space-between; }
+  .calendar-panel { padding: 10px; }
   .calendar-day { padding: 5px; }
   .day-items { left: 5px; right: 20px; bottom: 4px; font-size: 7px; }
   .day-number { right: 5px; bottom: 4px; }
