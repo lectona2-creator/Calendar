@@ -30,10 +30,8 @@ button { cursor: pointer; }
 .brand small { margin-top: 3px; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
 .storage-note { color: var(--muted); font-size: 10px; }
-.icon-button, .account-button, .round-button, .close-button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
-.icon-button, .account-button { padding: 7px 11px; border-radius: 9px; font-size: 11px; font-weight: 700; }
-.account-button { color: #c1e4c9; border-color: rgba(143, 189, 155, .45); background: rgba(143, 189, 155, .08); }
-.account-button:hover { border-color: var(--green); background: rgba(143, 189, 155, .14); }
+.icon-button, .round-button, .close-button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.icon-button { padding: 7px 11px; border-radius: 9px; font-size: 11px; font-weight: 700; }
 
 .dashboard { padding-top: 22px; }
 .hero-card { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 0 3px 18px; }
@@ -191,14 +189,6 @@ h2 { font-size: 17px; }
 .check-option i { width: 8px; height: 8px; border-radius: 50%; background: var(--item-color); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 7px; }
 .dialog-actions button { width: auto; }
-.auth-dialog { width: min(430px, calc(100% - 22px)); }
-.auth-dialog form { display: grid; gap: 12px; }
-.auth-config-note { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
-.auth-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 3px; }
-.auth-actions .secondary-button { width: auto; }
-.auth-actions .primary-button { width: auto; }
-.auth-error { min-height: 16px; margin: 0; color: #f0a19b; font-size: 10px; }
-.auth-account-name { color: var(--muted); font-size: 11px; }
 .toast { position: fixed; right: 24px; bottom: 24px; z-index: 10; padding: 12px 16px; border: 1px solid #70917a; border-radius: 11px; color: #edf6ef; background: #284332; opacity: 0; transform: translateY(12px); pointer-events: none; transition: .25s; }
 .toast.show { opacity: 1; transform: translateY(0); }
 

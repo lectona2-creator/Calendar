@@ -19,7 +19,6 @@
       </a>
       <div class="topbar-actions">
         <span class="storage-note" id="storageStatus">Restart-safe local storage</span>
-        <button class="account-button" id="accountButton" type="button">Sign in</button>
         <button class="icon-button" id="todayButton" type="button" aria-label="Go to today">Today</button>
       </div>
     </header>
@@ -167,31 +166,7 @@
     </form>
   </dialog>
 
-  <dialog id="authDialog" class="log-dialog auth-dialog" aria-labelledby="authDialogTitle">
-    <form id="authForm">
-      <div class="dialog-heading">
-        <div><p class="eyebrow">SYNC ACCOUNT</p><h2 id="authDialogTitle">Sign in</h2></div>
-        <button class="close-button" id="closeAuthButton" type="button" aria-label="Close">×</button>
-      </div>
-      <p class="auth-config-note" id="authConfigNote">Configure Supabase to enable account sync.</p>
-      <label class="event-field" for="authEmail">Email
-        <input id="authEmail" type="email" autocomplete="email" required>
-      </label>
-      <label class="event-field" for="authPassword">Password
-        <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required>
-      </label>
-      <div class="auth-actions">
-        <button class="secondary-button" id="authSwitchButton" type="button">Create account</button>
-        <button class="primary-button" id="authSubmitButton" type="submit">Sign in</button>
-      </div>
-      <p class="auth-error" id="authError" role="alert"></p>
-    </form>
-  </dialog>
-
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="supabase-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="src/supabase.js"></script>
   <script src="src/app.js"></script>
   <script src="src/calendar.js"></script>
 </body>
