@@ -38,6 +38,15 @@ class DailyRitualApp {
     }
   }
 
+  snapshot() {
+    return {
+      version: 3,
+      records: this.records,
+      events: this.events,
+      supplements: this.supplements
+    };
+  }
+
   persist() {
     const snapshot = this.snapshot();
     localStorage.setItem(this.storageKey, JSON.stringify(snapshot));
@@ -86,6 +95,7 @@ class DailyRitualApp {
     document.querySelector("#nextMonth").addEventListener("click", () => this.changeMonth(1));
     document.querySelector("#todayButton").addEventListener("click", () => this.goToday());
     document.querySelector("#logButton").addEventListener("click", () => this.openLogDialog());
+    document.querySelector("#closeLogButton").addEventListener("click", () => this.elements.logDialog.close());
     document.querySelector("#cancelButton").addEventListener("click", () => this.elements.logDialog.close());
     document.querySelector("#quickLogButton").addEventListener("click", () => {
       this.elements.quickMenuDialog.close();
@@ -538,10 +548,18 @@ class DailyRitualApp {
   saveDay(event) {
     event.preventDefault();
     const key = this.dateKey(this.selectedDate);
+    const previous = this.records[key];
     const selected = [...this.elements.checklist.querySelectorAll("input:checked")].map((input) => input.value);
     if (selected.length) this.records[key] = selected;
     else delete this.records[key];
-    this.persist();
+    try {
+      this.persist();
+    } catch {
+      if (previous) this.records[key] = previous;
+      else delete this.records[key];
+      this.showToast("Could not save. Check browser storage settings and try again.");
+      return;
+    }
     this.elements.logDialog.close();
     this.renderAll();
     this.showToast("Day saved.");
